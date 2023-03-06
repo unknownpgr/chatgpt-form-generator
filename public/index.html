@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auto-Survey</title>
+  </head>
+  <body>
+    <h1>Auto-Survey</h1>
+    <p>Auto-Survey is a survey tool that generate survey with chatgpt.</p>
+    <br />
+    <textarea
+      type="text"
+      id="question"
+      placeholder="Enter your question"
+      style="width: 80%; height: 100px"
+    ></textarea>
+    <button id="generate">Generate</button>
+    <ul id="survey"></ul>
+    <script>
+      const endpoint = "/ask";
+      const generate = document.getElementById("generate");
+      const question = document.getElementById("question");
+      const survey = document.getElementById("survey");
+      generate.addEventListener("click", () => {
+        // Get the question value
+        const questionValue = question.value;
+
+        survey.innerHTML = "<li>Loading...It will take up to 1 minute</li>";
+        survey.innerHTML += "<li>(Because I'm using free tier API.)</li>";
+
+        fetch(endpoint, {
+          method: "POST",
+          body: JSON.stringify({ question: questionValue }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            data.forEach((data) => {
+              switch (data.type) {
+                case "single-choice": {
+                  const li = document.createElement("li");
+                  const h1 = document.createElement("h1");
+                  h1.innerHTML = data.title;
+                  const p = document.createElement("p");
+                  p.innerHTML = data.content;
+                  const ul = document.createElement("ul");
+                  li.appendChild(h1);
+                  li.appendChild(p);
+                  li.appendChild(ul);
+                  data.options.forEach((item) => {
+                    const li2 = document.createElement("li");
+                    const input = document.createElement("input");
+                    input.setAttribute("type", "radio");
+                    input.setAttribute("name", "single-choice");
+                    const text2 = document.createTextNode(item);
+                    li2.appendChild(input);
+                    li2.appendChild(text2);
+                    ul.appendChild(li2);
+                  });
+                  survey.appendChild(li);
+                  break;
+                }
+                case "multiple-choice": {
+                  const li = document.createElement("li");
+                  const h1 = document.createElement("h1");
+                  h1.innerHTML = data.title;
+                  const p = document.createElement("p");
+                  p.innerHTML = data.content;
+                  const ul = document.createElement("ul");
+                  li.appendChild(h1);
+                  li.appendChild(p);
+                  li.appendChild(ul);
+                  data.options.forEach((item) => {
+                    const li2 = document.createElement("li");
+                    const input = document.createElement("input");
+                    input.setAttribute("type", "checkbox");
+                    input.setAttribute("name", "multiple-choice");
+                    const text2 = document.createTextNode(item);
+                    li2.appendChild(input);
+                    li2.appendChild(text2);
+                    ul.appendChild(li2);
+                  });
+                  survey.appendChild(li);
+                  break;
+                }
+                case "short answer": {
+                  const li = document.createElement("li");
+                  const h1 = document.createElement("h1");
+                  h1.innerHTML = data.title;
+                  const p = document.createElement("p");
+                  p.innerHTML = data.content;
+                  const input = document.createElement("input");
+                  input.setAttribute("type", "text");
+                  input.setAttribute("placeholder", "Enter your answer");
+                  li.appendChild(h1);
+                  li.appendChild(p);
+                  li.appendChild(input);
+                  survey.appendChild(li);
+                  break;
+                }
+              }
+            });
+          });
+      });
+    </script>
+  </body>
+</html>
