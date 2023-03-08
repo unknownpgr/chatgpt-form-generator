@@ -22,7 +22,6 @@
       const endpoint = "/ask";
       const generate = document.getElementById("generate");
       const question = document.getElementById("question");
-      const survey = document.getElementById("survey");
       generate.addEventListener("click", () => {
         // Get the question value
         const questionValue = question.value;
@@ -39,73 +38,58 @@
         })
           .then((res) => res.json())
           .then((data) => {
-            data.forEach((data) => {
-              switch (data.type) {
-                case "single-choice": {
-                  const li = document.createElement("li");
-                  const h1 = document.createElement("h1");
-                  h1.innerHTML = data.title;
-                  const p = document.createElement("p");
-                  p.innerHTML = data.content;
-                  const ul = document.createElement("ul");
-                  li.appendChild(h1);
-                  li.appendChild(p);
-                  li.appendChild(ul);
-                  data.options.forEach((item) => {
-                    const li2 = document.createElement("li");
-                    const input = document.createElement("input");
-                    input.setAttribute("type", "radio");
-                    input.setAttribute("name", "single-choice");
-                    const text2 = document.createTextNode(item);
-                    li2.appendChild(input);
-                    li2.appendChild(text2);
-                    ul.appendChild(li2);
-                  });
-                  survey.appendChild(li);
-                  break;
-                }
-                case "multiple-choice": {
-                  const li = document.createElement("li");
-                  const h1 = document.createElement("h1");
-                  h1.innerHTML = data.title;
-                  const p = document.createElement("p");
-                  p.innerHTML = data.content;
-                  const ul = document.createElement("ul");
-                  li.appendChild(h1);
-                  li.appendChild(p);
-                  li.appendChild(ul);
-                  data.options.forEach((item) => {
-                    const li2 = document.createElement("li");
-                    const input = document.createElement("input");
-                    input.setAttribute("type", "checkbox");
-                    input.setAttribute("name", "multiple-choice");
-                    const text2 = document.createTextNode(item);
-                    li2.appendChild(input);
-                    li2.appendChild(text2);
-                    ul.appendChild(li2);
-                  });
-                  survey.appendChild(li);
-                  break;
-                }
-                case "short answer": {
-                  const li = document.createElement("li");
-                  const h1 = document.createElement("h1");
-                  h1.innerHTML = data.title;
-                  const p = document.createElement("p");
-                  p.innerHTML = data.content;
-                  const input = document.createElement("input");
-                  input.setAttribute("type", "text");
-                  input.setAttribute("placeholder", "Enter your answer");
-                  li.appendChild(h1);
-                  li.appendChild(p);
-                  li.appendChild(input);
-                  survey.appendChild(li);
-                  break;
-                }
-              }
-            });
+            survey.innerHTML = "";
+            renderSurvey(data);
           });
       });
+
+      function renderSurvey(questions) {
+        const survey = document.getElementById("survey");
+
+        questions.forEach((question) => {
+          const li = document.createElement("li");
+          const h1 = document.createElement("h1");
+          const p = document.createElement("p");
+          const ul = document.createElement("ul");
+
+          h1.innerText = question.title;
+          p.innerText = question.content;
+
+          if (question.type === "short answer") {
+            const input = document.createElement("input");
+            input.type = "text";
+            li.appendChild(h1);
+            li.appendChild(p);
+            li.appendChild(input);
+            survey.appendChild(li);
+          }
+
+          if (
+            question.type === "single-choice" ||
+            question.type === "multiple-choice"
+          ) {
+            li.appendChild(h1);
+            li.appendChild(p);
+
+            question.options.forEach((option) => {
+              const optionLi = document.createElement("li");
+              const label = document.createElement("label");
+              const input = document.createElement("input");
+              label.innerText = option;
+              input.type =
+                question.type === "single-choice" ? "radio" : "checkbox";
+              input.value = option;
+
+              label.insertBefore(input, label.firstChild);
+              optionLi.appendChild(label);
+              ul.appendChild(optionLi);
+            });
+
+            li.appendChild(ul);
+            survey.appendChild(li);
+          }
+        });
+      }
     </script>
   </body>
 </html>
