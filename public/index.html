@@ -4,23 +4,89 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: "Times New Roman", serif;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 0 10px #ccc;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      footer {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #ccc;
+      }
+
+      #survey {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #ccc;
+      }
+
+      #question {
+        box-sizing: border-box;
+        width: 100%;
+        height: 100px;
+        resize: none;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      li {
+        margin-bottom: 10px;
+      }
+    </style>
     <title>Auto-Survey</title>
   </head>
   <body>
-    <h1>Auto-Survey</h1>
-    <p>Auto-Survey is a survey tool that generate survey with chatgpt.</p>
-    <br />
-    <textarea
-      type="text"
-      id="question"
-      placeholder="Enter your question"
-      style="width: 80%; height: 100px"
-    ></textarea>
-    <button id="generate">Generate</button>
-    <ul id="survey"></ul>
-    <footer>
-      <div style="text-align: center">Copyright 2020 @ Unknownpgr</div>
-    </footer>
+    <div class="container">
+      <h1>Auto-Survey</h1>
+      <p>Auto-Survey is a survey tool that generate survey with chatgpt.</p>
+      <br />
+      <textarea
+        type="text"
+        id="question"
+        placeholder="Enter your question"
+      ></textarea>
+      <div>
+        <button id="generate">Generate</button>
+      </div>
+      <div>
+        <p><b>Example</b></p>
+        <ul>
+          <li>- What is your favorite color?</li>
+          <li>
+            - As a CEO of a company, I want to investigate in which country I
+            should expand my business. Generate a survey for me.
+          </li>
+          <li>
+            - I am a researcher and I want to know what people think about the
+            COVID-19 vaccine. Generate a survey for me.
+          </li>
+        </ul>
+      </div>
+      <br />
+      <ul id="survey">
+        <li>Generated survey will be shown here.</li>
+      </ul>
+      <footer>
+        <div style="text-align: center">Copyright 2020 @ Unknownpgr</div>
+      </footer>
+    </div>
     <script>
       const endpoint = "/ask";
       const generate = document.getElementById("generate");
@@ -31,6 +97,8 @@
 
         survey.innerHTML = "<li>Loading...It will take up to 1 minute</li>";
         survey.innerHTML += "<li>(Because I'm using free tier API.)</li>";
+
+        generate.disabled = true;
 
         fetch(endpoint, {
           method: "POST",
@@ -43,6 +111,13 @@
           .then((data) => {
             survey.innerHTML = "";
             renderSurvey(data);
+          })
+          .catch((err) => {
+            survey.innerHTML = "<li>Something went wrong.</li>";
+            console.log(err);
+          })
+          .finally(() => {
+            generate.disabled = false;
           });
       });
 
@@ -51,17 +126,17 @@
 
         questions.forEach((question) => {
           const li = document.createElement("li");
-          const h1 = document.createElement("h1");
+          const h2 = document.createElement("h2");
           const p = document.createElement("p");
           const ul = document.createElement("ul");
 
-          h1.innerText = question.title;
+          h2.innerText = question.title;
           p.innerText = question.content;
 
           if (question.type === "short answer") {
             const input = document.createElement("input");
             input.type = "text";
-            li.appendChild(h1);
+            li.appendChild(h2);
             li.appendChild(p);
             li.appendChild(input);
             survey.appendChild(li);
@@ -71,7 +146,7 @@
             question.type === "single-choice" ||
             question.type === "multiple-choice"
           ) {
-            li.appendChild(h1);
+            li.appendChild(h2);
             li.appendChild(p);
 
             question.options.forEach((option) => {
